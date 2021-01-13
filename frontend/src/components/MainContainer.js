@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+
 import { useErrorHandler } from 'react-error-boundary';
 import io from 'socket.io-client';
 import axios from 'axios';
@@ -23,6 +24,8 @@ import { ShowDialogIcon, StreamParams, Map, InsightTabs, TweetList, WordCloud } 
 import { NotifySettings, ScheduleTweet, Filters, Graphs } from '.';
 import { UserError } from './AlertWindow';
 
+import { MAP_ID } from '../constants';
+
 const useStyles = makeStyles((theme) => ({
   paper: {
     top: 0,
@@ -36,16 +39,19 @@ const useStyles = makeStyles((theme) => ({
     overflow: 'hidden',
   },
   header: {
-    height: '10%',
-    marginTop: 10,
-    marginBottom: 10,
+    height: '15%',
+    paddingTop: 10,
+    paddingBottom: 10,
   },
   mainContainer: {
-    height: 850,
-    '& .leaflet-container': {
-      margin: 20,
-      width: '95%',
-      height: '84vh',
+    height: '85%',
+  },
+  sideContainer: {
+    height: '100%',
+    padding: theme.spacing(1),
+    '& #map, & .leaflet-container': {
+      width: '100%',
+      height: '100%',
     },
   },
   settingsIcon: {
@@ -67,7 +73,7 @@ const COORDINATE_RE = /^-?[\d]{1,3}[.][\d]+$/;
 
 const MainContainer = () => {
   const launch = useErrorHandler();
-  const { paper, header, mainContainer, settingsIcon } = useStyles();
+  const { paper, header, mainContainer, sideContainer, settingsIcon } = useStyles();
   // To set the id of the current stream
   const [streamId, setStreamId] = useState();
   const [tweets, setTweets] = useState([]);
@@ -94,9 +100,9 @@ const MainContainer = () => {
 
   //cookie
   useEffect(() => {
-    const fetchSettings = async (streamId) => {
+    const fetchSettings = async (id) => {
       try {
-        const res = await axios.get(`${SETTINGS}?streamId=${streamId}`);
+        const res = await axios.get(`${SETTINGS}?streamId=${id}`);
         const settings = res.data;
 
         if (settings.locations) {
@@ -189,7 +195,11 @@ const MainContainer = () => {
       socket.on('tweet', (tweet) => {
         setTweets((prevTweets) => [...prevTweets, tweet]);
       });
-      socket.on('error', console.log);
+      socket.on('error', (err) => {
+        if (err.source && err.source === 'Exceeded connection limit for user') {
+          launch(UserError('Exceeded connection limit'));
+        }
+      });
     } catch (err) {
       launch(UserError("Couldn't start stream on server, please retry!"));
     }
@@ -317,15 +327,17 @@ const MainContainer = () => {
       </Grid>
 
       {/* Grid layout for Map and InsightTabs */}
-      <Grid container>
-        <Grid item xs={6} className={mainContainer}>
-          <Map
-            tweetsList={tweetsFiltered}
-            setCoordinates={onAddRect}
-            showToolbars={!streamId}
-          />
+      <Grid container className={mainContainer}>
+        <Grid item xs={6} className={sideContainer}>
+          <div id={MAP_ID}>
+            <Map
+              tweetsList={tweetsFiltered}
+              setCoordinates={onAddRect}
+              showToolbars={!streamId}
+            />
+          </div>
         </Grid>
-        <Grid item xs={6} className={mainContainer}>
+        <Grid item xs={6} className={sideContainer}>
           <InsightTabs>
             <TweetList list={tweetsFiltered} setList={setTweets} tabName="Tweet List" />
             <WordCloud list={tweetsFiltered} tabName="Wordcloud" />

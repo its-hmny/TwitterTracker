@@ -24,19 +24,19 @@ const Filters = ({ list, setFilteredList }) => {
     setFilters({ ...filters, [e.target.name]: e.target.value });
 
   const { countryList, cityList } = useMemo(() => {
-    const countryList = list.reduce((accList, tweet) => {
+    const countries = list.reduce((accList, tweet) => {
       if (tweet.place && !accList.includes(tweet.place.country_code))
         accList.push(tweet.place.country_code);
       return accList;
     }, []);
 
-    const cityList = list.reduce((accList, tweet) => {
+    const cities = list.reduce((accList, tweet) => {
       if (tweet.place && !accList.includes(tweet.place.name))
         accList.push(tweet.place.name);
       return accList;
     }, []);
 
-    return { countryList, cityList };
+    return { countryList: countries, cityList: cities };
   }, [list]);
 
   const applyFilter = () => {
@@ -63,7 +63,7 @@ const Filters = ({ list, setFilteredList }) => {
 
   return (
     <>
-      <Grid container xs={12} justify="space-evenly">
+      <Grid container justify="space-evenly">
         <InputField
           type="date"
           label="Min date"
@@ -102,7 +102,7 @@ const Filters = ({ list, setFilteredList }) => {
         />
       </Grid>
 
-      <Grid container xs={12} justify="space-evenly">
+      <Grid container justify="space-evenly">
         <SelectField
           id="geoloc"
           label="Geolocalization"
@@ -119,8 +119,12 @@ const Filters = ({ list, setFilteredList }) => {
           value={filters.country}
           onChange={onChangeFilter}
         >
-          {countryList.map((element) => {
-            return <MenuItem value={element}>{element}</MenuItem>;
+          {countryList.map((element, index) => {
+            return (
+              <MenuItem key={index} value={element}>
+                {element}
+              </MenuItem>
+            );
           })}
         </SelectField>
 
@@ -130,12 +134,16 @@ const Filters = ({ list, setFilteredList }) => {
           value={filters.city}
           onChange={onChangeFilter}
         >
-          {cityList.map((element) => {
-            return <MenuItem value={element}>{element}</MenuItem>;
+          {cityList.map((element, index) => {
+            return (
+              <MenuItem key={index} value={element}>
+                {element}
+              </MenuItem>
+            );
           })}
         </SelectField>
       </Grid>
-      <Grid container xs={12} justify="space-evenly">
+      <Grid container justify="space-evenly">
         <Button
           color="primary"
           variant="contained"

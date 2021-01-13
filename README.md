@@ -41,3 +41,4 @@ tunnels:
 
 ## Credits
 This project was made by [me](https://github.com/its-hmny), [Mattia Guazzaloca](https://github.com/mettz), [Lorenzo Liso](https://github.com/notchla), [Paolo Marzolo](https://github.com/pollomarzo), [Matteo Lorenzoni](https://github.com/Lorenz08) as an assignment for the Software Engineering course at University  of Bologna.
+A demo will be temporary avaiable [here](http://34.65.106.228:8080/)

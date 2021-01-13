@@ -1,10 +1,11 @@
 const path = require('path');
-const cors = require('cors');
 const express = require('express');
+const app = express();
+const cors = require('cors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const creds = require('./api/twitter/.credentials.json');
 
-const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   path: '/socket', // needed for cors in dev
@@ -17,7 +18,7 @@ const twitter = require('./api/twitter');
 app.use(
   cors({
     credentials: true,
-    origin: ['http://localhost:3000', 'http://2e6dd6fc010c.eu.ngrok.io'],
+    origin: ['http://localhost:3000', creds.auth_url.replace('/auth', '')],
   })
 );
 /** needs to accept:
@@ -29,7 +30,7 @@ app.use(cookieParser('super duper secret password'));
 app.use(bodyParser.json({ limit: '50mb', extended: true }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-app.use(express.static(path.join(__dirname,  'build'))); // static middleware
+app.use(express.static(path.join(__dirname, 'build'))); // static middleware
 
 app.use('/api', api);
 
